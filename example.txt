@@ -11,3 +11,5 @@ n0,n5,9,light
 n1,n4,11,medium
 n1,n5,6,medium
 n2,n3,8,light
+n4,n5,1,heavy
+n5,n3,1,heavy

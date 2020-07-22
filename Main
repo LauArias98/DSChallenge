@@ -5,6 +5,8 @@ content = file.readlines()
 size = 0
 instructions = []
 
+# Obtener la cantidad de nodos
+# Guardar la distancia y cantidad de trafico entre nodos en el arreglo instructions
 for i in content:
     if "," not in i:
         size += 1
@@ -12,7 +14,14 @@ for i in content:
         instructions.append(i)
 
 matrix = np.ones((size, size, 2)) * 999
+path = np.zeros([7, 7])
+# Diagonal de 0s
+for i in range(len(matrix)):
+    for j in range((len(matrix))):
+        if i == j:
+            matrix[i][j] = 0
 
+# Agregar distancia y trafico entre nodos a la matriz
 for i in instructions:
     parts = i.split(",")
     pos1 = int(parts[0].replace("n", ""))
@@ -27,5 +36,17 @@ for i in instructions:
     elif level == "heavy":
         matrix[pos1][pos2], matrix[pos1][pos2][1] = dist, 10
 
-print(matrix)
+    for k in range(size):
+        for j in range(size):
+            for i in range(size):
+                p1 = matrix[i][k][0]
+                p2 = matrix[k][j][0]
+                p3 = matrix[i][j][0]
+                if p1 + p2 < p3:
+                    matrix[i][j][0] = p1 + p2
+
+                    #path[i][j] = k
+
+
+print(path)
 
