@@ -1,0 +1,13 @@
+n0
+n1
+n2
+n3
+n4
+n5
+n6
+n0,n3,10,medium
+n0,n4,7,heavy
+n0,n5,9,light
+n1,n4,11,medium
+n1,n5,6,medium
+n2,n3,8,light

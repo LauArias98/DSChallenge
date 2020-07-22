@@ -1,0 +1,31 @@
+import numpy as np
+
+file = open("example.txt", "r")
+content = file.readlines()
+size = 0
+instructions = []
+
+for i in content:
+    if "," not in i:
+        size += 1
+    else:
+        instructions.append(i)
+
+matrix = np.ones((size, size, 2)) * 999
+
+for i in instructions:
+    parts = i.split(",")
+    pos1 = int(parts[0].replace("n", ""))
+    pos2 = int(parts[1].replace("n", ""))
+    dist = int(parts[2])
+    level = parts[3].strip()
+
+    if level == "light":
+        matrix[pos1][pos2], matrix[pos1][pos2][1] = dist, 1
+    elif level == "medium":
+        matrix[pos1][pos2], matrix[pos1][pos2][1] = dist, 5
+    elif level == "heavy":
+        matrix[pos1][pos2], matrix[pos1][pos2][1] = dist, 10
+
+print(matrix)
+
