@@ -33,11 +33,11 @@ def open_file():
         level = parts[3].strip()
 
         if level == "light":
-            adj_matrix[pos1][pos2], adj_matrix[pos1][pos2][1] = dist, 1
+            adj_matrix[pos1][pos2], adj_matrix[pos1][pos2][1] = dist, 100
         elif level == "medium":
-            adj_matrix[pos1][pos2], adj_matrix[pos1][pos2][1] = dist, 5
+            adj_matrix[pos1][pos2], adj_matrix[pos1][pos2][1] = dist, 50
         elif level == "heavy":
-            adj_matrix[pos1][pos2], adj_matrix[pos1][pos2][1] = dist, 10
+            adj_matrix[pos1][pos2], adj_matrix[pos1][pos2][1] = dist, 20
 
     return adj_matrix
 
@@ -51,11 +51,22 @@ def shortest_path():
     for k in range(size):
         for j in range(size):
             for i in range(size):
+                # Distance
                 p1 = matrix[i][k][0]
                 p2 = matrix[k][j][0]
                 p3 = matrix[i][j][0]
+                # Velocity
+                v1 = matrix[i][k][1]
+                v2 = matrix[k][j][1]
+                v3 = matrix[i][j][1]
+                if v1 == 0 or v2 == 0 or v3 == 0:
+                    continue
+                # Time
+                t1 = p1/v1
+                t2 = p2/v2
+                t3 = p3/v3
                 # Checks if it's better to pass by an intermediate node or not
-                if p1 + p2 < p3:
+                if t1 + t2 < t3:
                     matrix[i][j][0] = p1 + p2
                     path_matrix[i][j] = k
     return path_matrix
