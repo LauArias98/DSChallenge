@@ -1,52 +1,69 @@
 import numpy as np
 
-file = open("example.txt", "r")
-content = file.readlines()
-size = 0
-instructions = []
-path = []
-# Obtener la cantidad de nodos
-# Guardar la distancia y cantidad de trafico entre nodos en el arreglo instructions
-for i in content:
-    if "," not in i:
-        size += 1
-    else:
-        instructions.append(i)
 
-matrix = np.ones((size, size, 2)) * 999
-pathMatrix = np.zeros([7, 7])
-# Diagonal de 0s
-for i in range(len(matrix)):
-    for j in range((len(matrix))):
-        if i == j:
-            matrix[i][j] = 0
+def open_file():
+    print("Type the file's name: ")
+    name = input()
+    file = open(name, "r")
+    content = file.readlines()
+    instructions = []
+    size = 0
+    # Get amount of nodes
+    # Save distance and traffic into instructions array
+    for i in content:
+        if "," not in i:
+            size += 1
+        else:
+            instructions.append(i)
+    # Creation of adjacency adj_matrix
+    adj_matrix = np.ones((size, size, 2)) * 999
 
-# Agregar distancia y trafico entre nodos a la matriz
-for i in instructions:
-    parts = i.split(",")
-    pos1 = int(parts[0].replace("n", ""))
-    pos2 = int(parts[1].replace("n", ""))
-    dist = int(parts[2])
-    level = parts[3].strip()
+    # Diagonal of 0s
+    for i in range(len(adj_matrix)):
+        for j in range((len(adj_matrix))):
+            if i == j:
+                adj_matrix[i][j] = 0
 
-    if level == "light":
-        matrix[pos1][pos2], matrix[pos1][pos2][1] = dist, 1
-    elif level == "medium":
-        matrix[pos1][pos2], matrix[pos1][pos2][1] = dist, 5
-    elif level == "heavy":
-        matrix[pos1][pos2], matrix[pos1][pos2][1] = dist, 10
+    # Add distance and traffic to the adjacency matrix
+    for i in instructions:
+        parts = i.split(",")
+        pos1 = int(parts[0].replace("n", ""))
+        pos2 = int(parts[1].replace("n", ""))
+        dist = int(parts[2])
+        level = parts[3].strip()
 
-    # Caminos de distancia minima
+        if level == "light":
+            adj_matrix[pos1][pos2], adj_matrix[pos1][pos2][1] = dist, 1
+        elif level == "medium":
+            adj_matrix[pos1][pos2], adj_matrix[pos1][pos2][1] = dist, 5
+        elif level == "heavy":
+            adj_matrix[pos1][pos2], adj_matrix[pos1][pos2][1] = dist, 10
+
+    return adj_matrix
+
+
+matrix = open_file()
+
+
+def shortest_path():
+    size = len(matrix[0])
+    path_matrix = np.zeros([size, size])
     for k in range(size):
         for j in range(size):
             for i in range(size):
                 p1 = matrix[i][k][0]
                 p2 = matrix[k][j][0]
                 p3 = matrix[i][j][0]
-                # Revisa si es mejor ir directamente o pasar por un nodo intermedio
+                # Checks if it's better to pass by an intermediate node or not
                 if p1 + p2 < p3:
                     matrix[i][j][0] = p1 + p2
-                    pathMatrix[i][j] = k
+                    path_matrix[i][j] = k
+    return path_matrix
+
+
+pathMatrix = shortest_path()
+
+path = []
 
 
 def ask():
@@ -54,15 +71,17 @@ def ask():
     start = int(input())
     print("End node: ")
     end = int(input())
-    # Revisa que exista un camino entre los nodos de inicio y final
-    if matrix[start][end][0]!=999:
-        # Reconstruccion del camino
-        while end!=0:
+    # Checks if the path between nodes exists
+    if matrix[start][end][0] != 999:
+        # Path rebuilding
+        while end != 0:
             path.append(end)
             end = int(pathMatrix[start][end])
         path.append(start)
         return list(reversed(path))
+
     else:
-        return "Sorry, no path"
+        return "Sorry, no path!"
+
 
 print(ask())
