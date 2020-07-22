@@ -72,6 +72,12 @@ def ask():
     print("End node: ")
     end = int(input())
     # Checks if the path between nodes exists
+    return start, end
+
+
+def process(nodes):
+    start = nodes[0]
+    end = nodes[1]
     if matrix[start][end][0] != 999:
         # Path rebuilding
         while end != 0:
@@ -84,4 +90,4 @@ def ask():
         return "Sorry, no path!"
 
 
-print(ask())
+print(process(ask()))
