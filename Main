@@ -1,6 +1,21 @@
 import numpy as np
 
 
+def menu():
+    condition = True
+    while condition:
+        print("Hello! What would you like to do?: \n 1. Load information \n 2. Look for a route \n 3. Exit")
+        choice = int(input())
+        if choice == 3:
+            print("Bye!")
+            break
+        matrix = open_file()
+        if choice == 1:
+            shortest_path(matrix)
+        elif choice == 2:
+            print(process(ask(), matrix), "\n")
+
+
 def open_file():
     print("Type the file's name: ")
     name = input()
@@ -42,10 +57,7 @@ def open_file():
     return adj_matrix
 
 
-matrix = open_file()
-
-
-def shortest_path():
+def shortest_path(matrix):
     size = len(matrix[0])
     path_matrix = np.zeros([size, size])
     for k in range(size):
@@ -71,12 +83,6 @@ def shortest_path():
                     path_matrix[i][j] = k
     return path_matrix
 
-
-pathMatrix = shortest_path()
-
-path = []
-
-
 def ask():
     print("Start node: ")
     start = int(input())
@@ -86,9 +92,11 @@ def ask():
     return start, end
 
 
-def process(nodes):
+def process(nodes, matrix):
     start = nodes[0]
     end = nodes[1]
+    pathMatrix = shortest_path(matrix)
+    path = []
     if matrix[start][end][0] != 999:
         # Path rebuilding
         while end != 0:
@@ -101,4 +109,6 @@ def process(nodes):
         return "Sorry, no path!"
 
 
-print(process(ask()))
+if __name__ == "__main__":
+    menu()
+#print(process(ask()))
