@@ -2,23 +2,23 @@ import numpy as np
 
 
 def menu():
+    print("Hello! \nType the file's name to load data: ")
+    name = input()
+    matrix = open_file(name)
+    sh_m = shortest_path(matrix)
     condition = True
     while condition:
-        print("Hello! What would you like to do?: \n 1. Load information \n 2. Look for a route \n 3. Exit")
+        print("What would you like to do now?: \n 1. Look for a route \n 2. Exit")
         choice = int(input())
-        if choice == 3:
+        if choice == 2:
             print("Bye!")
             break
-        matrix = open_file()
-        if choice == 1:
-            shortest_path(matrix)
-        elif choice == 2:
-            print(process(ask(), matrix), "\n")
+
+        elif choice == 1:
+            print("The best path between the nodes is:", process(ask(), matrix, sh_m), "\n")
 
 
-def open_file():
-    print("Type the file's name: ")
-    name = input()
+def open_file(name):
     file = open(name, "r")
     content = file.readlines()
     instructions = []
@@ -83,6 +83,7 @@ def shortest_path(matrix):
                     path_matrix[i][j] = k
     return path_matrix
 
+
 def ask():
     print("Start node: ")
     start = int(input())
@@ -92,23 +93,21 @@ def ask():
     return start, end
 
 
-def process(nodes, matrix):
+def process(nodes, matrix, short_paths):
     start = nodes[0]
     end = nodes[1]
-    pathMatrix = shortest_path(matrix)
     path = []
     if matrix[start][end][0] != 999:
         # Path rebuilding
         while end != 0:
             path.append(end)
-            end = int(pathMatrix[start][end])
+            end = int(short_paths[start][end])
         path.append(start)
         return list(reversed(path))
 
     else:
-        return "Sorry, no path!"
+        return "Sorry, no path between these nodes!"
 
 
 if __name__ == "__main__":
     menu()
-#print(process(ask()))
