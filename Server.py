@@ -1,20 +1,15 @@
+import socket
 import numpy as np
 
+# Create a TCP/IP socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-def menu():
-    print("Hello! \nType the file's name to load data: ")
-    name = input()
-    matrix = open_file(name)
-    sh_m = shortest_path(matrix)
-    condition = True
-    while condition:
-        print("What would you like to do now?: \n 1. Look for a route \n 2. Exit")
-        choice = int(input())
-        if choice == 2:
-            print("Bye!")
-            break
-        elif choice == 1:
-            print("The best path between the nodes is:", process(ask(), matrix, sh_m), "\n")
+# Bind the socket to the port
+server_address = ("localhost", 10000)
+sock.bind(server_address)
+
+# Listen for incoming connections
+sock.listen(1)
 
 
 def open_file(name):
@@ -73,9 +68,9 @@ def shortest_path(matrix):
                 if v1 == 0 or v2 == 0 or v3 == 0:
                     continue
                 # Time
-                t1 = p1/v1
-                t2 = p2/v2
-                t3 = p3/v3
+                t1 = p1 / v1
+                t2 = p2 / v2
+                t3 = p3 / v3
                 # Checks if it's better to pass by an intermediate node or not
                 if t1 + t2 < t3:
                     matrix[i][j][0] = p1 + p2
@@ -83,18 +78,9 @@ def shortest_path(matrix):
     return path_matrix
 
 
-def ask():
-    print("Start node: ")
-    start = int(input())
-    print("End node: ")
-    end = int(input())
-    # Checks if the path between nodes exists
-    return start, end
-
-
 def process(nodes, matrix, short_paths):
-    start = nodes[0]
-    end = nodes[1]
+    start = int(nodes[0])
+    end = int(nodes[1])
     path = []
     if matrix[start][end][0] != 999:
         # Path rebuilding
@@ -105,8 +91,36 @@ def process(nodes, matrix, short_paths):
         return list(reversed(path))
 
     else:
-        return "Sorry, no path between these nodes!"
+        return "n"
 
 
-if __name__ == "__main__":
-    menu()
+print("Hello! \nType the file's name to load data: ")
+name = input()
+matrix = open_file(name)
+sh_m = shortest_path(matrix)
+
+while True:
+    # Wait for a connection
+    print("Waiting for a connection")
+    connection, client_address = sock.accept()
+    try:
+        print('Connection from', client_address)
+
+        # Receive the data
+        while True:
+            data = connection.recv(16)
+            # Turning received data into String
+            info = data.decode("utf-8")
+            info = info.split(",")
+            finalResp = ', '.join(map(str, process(info, matrix, sh_m)))
+
+            if data:
+                data = bytes(finalResp, "utf-8")
+                connection.sendall(data)
+            else:
+                print("no data from", client_address)
+                break
+
+    finally:
+        # Clean up the connection
+        connection.close()
