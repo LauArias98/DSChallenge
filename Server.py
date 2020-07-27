@@ -1,5 +1,6 @@
 import socket
 import numpy as np
+import _thread
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -9,7 +10,7 @@ server_address = ("localhost", 10000)
 sock.bind(server_address)
 
 # Listen for incoming connections
-sock.listen(1)
+sock.listen(5)
 
 
 def open_file(name):
@@ -99,28 +100,37 @@ name = input()
 matrix = open_file(name)
 sh_m = shortest_path(matrix)
 
+
+def accept_client(connection, client_address):
+    while True:
+        try:
+            print('Connection from', client_address)
+
+            # Receive the data
+            while True:
+                data = connection.recv(16)
+                # Turning received data into String
+                info = data.decode("utf-8")
+                info = info.split(",")
+                finalResp = ', '.join(map(str, process(info, matrix, sh_m)))
+
+                if data:
+                    data = bytes(finalResp, "utf-8")
+                    connection.sendall(data)
+                else:
+                    print("no data from", client_address)
+                    break
+
+        finally:
+            # Clean up the connection
+            connection.close()
+
+
 while True:
     # Wait for a connection
     print("Waiting for a connection")
     connection, client_address = sock.accept()
-    try:
-        print('Connection from', client_address)
+    _thread.start_new_thread(accept_client, (connection, client_address))
 
-        # Receive the data
-        while True:
-            data = connection.recv(16)
-            # Turning received data into String
-            info = data.decode("utf-8")
-            info = info.split(",")
-            finalResp = ', '.join(map(str, process(info, matrix, sh_m)))
 
-            if data:
-                data = bytes(finalResp, "utf-8")
-                connection.sendall(data)
-            else:
-                print("no data from", client_address)
-                break
 
-    finally:
-        # Clean up the connection
-        connection.close()
