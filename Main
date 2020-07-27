@@ -5,6 +5,7 @@ def menu():
     print("Hello! \nType the file's name to load data: ")
     name = input()
     matrix = open_file(name)
+    np.save("outfile", matrix)
     sh_m = shortest_path(matrix)
     condition = True
     while condition:

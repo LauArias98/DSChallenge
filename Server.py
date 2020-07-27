@@ -1,6 +1,7 @@
+import _thread
 import socket
 import numpy as np
-import _thread
+
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -13,8 +14,9 @@ sock.bind(server_address)
 sock.listen(5)
 
 
-def open_file(name):
-    file = open(name, "r")
+# This method opens the file received by input and constructs the adjacency matrix
+def open_file(file):
+    file = open(file, "r")
     content = file.readlines()
     instructions = []
     size = 0
@@ -52,20 +54,21 @@ def open_file(name):
     return adj_matrix
 
 
-def shortest_path(matrix):
-    size = len(matrix[0])
+# This method builds the matrix that contains the best path between nodes
+def shortest_path(p_matrix):
+    size = len(p_matrix[0])
     path_matrix = np.zeros([size, size])
     for k in range(size):
         for j in range(size):
             for i in range(size):
                 # Distance
-                p1 = matrix[i][k][0]
-                p2 = matrix[k][j][0]
-                p3 = matrix[i][j][0]
+                p1 = p_matrix[i][k][0]
+                p2 = p_matrix[k][j][0]
+                p3 = p_matrix[i][j][0]
                 # Velocity
-                v1 = matrix[i][k][1]
-                v2 = matrix[k][j][1]
-                v3 = matrix[i][j][1]
+                v1 = p_matrix[i][k][1]
+                v2 = p_matrix[k][j][1]
+                v3 = p_matrix[i][j][1]
                 if v1 == 0 or v2 == 0 or v3 == 0:
                     continue
                 # Time
@@ -74,16 +77,17 @@ def shortest_path(matrix):
                 t3 = p3 / v3
                 # Checks if it's better to pass by an intermediate node or not
                 if t1 + t2 < t3:
-                    matrix[i][j][0] = p1 + p2
+                    p_matrix[i][j][0] = p1 + p2
                     path_matrix[i][j] = k
     return path_matrix
 
 
-def process(nodes, matrix, short_paths):
+# This method is the one that rebuilds the path
+def process(nodes, p_matrix, short_paths):
     start = int(nodes[0])
     end = int(nodes[1])
     path = []
-    if matrix[start][end][0] != 999:
+    if p_matrix[start][end][0] != 999:
         # Path rebuilding
         while end != 0:
             path.append(end)
@@ -95,20 +99,22 @@ def process(nodes, matrix, short_paths):
         return "n"
 
 
-print("Hello! \nType the file's name to load data: ")
+print("Hello! \nType the file's name to load the data: ")
 name = input()
 matrix = open_file(name)
 sh_m = shortest_path(matrix)
+# Saves both matrices into a single file in compressed .npz format.
+np.savez_compressed('outfile', matrix=matrix, sh_m=sh_m)
 
 
-def accept_client(connection, client_address):
+def accept_client(p_connection, p_client_address):
     while True:
         try:
-            print('Connection from', client_address)
+            print('Connection from', p_client_address)
 
             # Receive the data
             while True:
-                data = connection.recv(16)
+                data = p_connection.recv(16)
                 # Turning received data into String
                 info = data.decode("utf-8")
                 info = info.split(",")
@@ -116,14 +122,14 @@ def accept_client(connection, client_address):
 
                 if data:
                     data = bytes(finalResp, "utf-8")
-                    connection.sendall(data)
+                    p_connection.sendall(data)
                 else:
-                    print("no data from", client_address)
+                    print("no data from", p_client_address)
                     break
 
         finally:
             # Clean up the connection
-            connection.close()
+            p_connection.close()
 
 
 while True:
@@ -131,6 +137,3 @@ while True:
     print("Waiting for a connection")
     connection, client_address = sock.accept()
     _thread.start_new_thread(accept_client, (connection, client_address))
-
-
-
