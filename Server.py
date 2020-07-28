@@ -20,13 +20,14 @@ def open_file(file):
     content = file.readlines()
     instructions = []
     size = 0
-    # Get amount of nodes
-    # Save distance and traffic into instructions array
     for i in content:
+        # Get amount of nodes
         if "," not in i:
             size += 1
+        # Save distance and traffic into instructions array
         else:
             instructions.append(i)
+
     # Creation of adjacency adj_matrix
     adj_matrix = np.ones((size, size, 2)) * 999
 
@@ -44,6 +45,7 @@ def open_file(file):
         dist = int(parts[2])
         level = parts[3].strip()
 
+        # light = 100 km/h, medium = 50 km/h, heavy = 20 km/h
         if level == "light":
             adj_matrix[pos1][pos2], adj_matrix[pos1][pos2][1] = dist, 100
         elif level == "medium":
@@ -69,6 +71,7 @@ def shortest_path(p_matrix):
                 v1 = p_matrix[i][k][1]
                 v2 = p_matrix[k][j][1]
                 v3 = p_matrix[i][j][1]
+                # Avoid division by 0
                 if v1 == 0 or v2 == 0 or v3 == 0:
                     continue
                 # Time
@@ -94,17 +97,18 @@ def process(nodes, p_matrix, short_paths):
             end = int(short_paths[start][end])
         path.append(start)
         return list(reversed(path))
-
     else:
         return "n"
 
 
 print("Hello! \nType the file's name to load the data: ")
 name = input()
+# Creation of the adjacency matrix
 matrix = open_file(name)
-sh_m = shortest_path(matrix)
+# Creation of the shortest paths matrix
+short_matrix = shortest_path(matrix)
 # Saves both matrices into a single file in compressed .npz format.
-np.savez_compressed('outfile', matrix=matrix, sh_m=sh_m)
+np.savez_compressed('outfile', matrix=matrix, sh_m=short_matrix)
 
 
 def accept_client(p_connection, p_client_address):
@@ -118,13 +122,13 @@ def accept_client(p_connection, p_client_address):
                 # Turning received data into String
                 info = data.decode("utf-8")
                 info = info.split(",")
-                finalResp = ', '.join(map(str, process(info, matrix, sh_m)))
+                finalResp = " ,".join(map(str, process(info, matrix, short_matrix)))
 
                 if data:
                     data = bytes(finalResp, "utf-8")
                     p_connection.sendall(data)
                 else:
-                    print("no data from", p_client_address)
+                    print("No data from", p_client_address)
                     break
 
         finally:
